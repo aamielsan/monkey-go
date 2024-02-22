@@ -56,16 +56,16 @@ func LookupTypeFrom(str string) TokenType {
 
 // Factory & constants
 var (
-	Eof       = New("EOF", "EOF")
-	Assign    = New("ASSIGN", "=")
-	Plus      = New("PLUS", "+")
-	Comma     = New("COMMA", ",")
-	Semicolon = New("SEMICOLON", ";")
-	LParen    = New("LPAREN", "(")
-	RParen    = New("RPAREN", ")")
-	LBrace    = New("LBRACE", "{")
-	RBrace    = New("RBRACE", "}")
-	Let       = New("LET", "let")
+	Eof       = New(EOF, "EOF")
+	Assign    = New(ASSIGN, "=")
+	Plus      = New(PLUS, "+")
+	Comma     = New(COMMA, ",")
+	Semicolon = New(SEMICOLON, ";")
+	LParen    = New(LPAREN, "(")
+	RParen    = New(RPAREN, ")")
+	LBrace    = New(LBRACE, "{")
+	RBrace    = New(RBRACE, "}")
+	Let       = New(LET, "let")
 )
 
 func Illegal(literal string) Token {
