@@ -1,25 +1,68 @@
 package lexer
 
 import (
-	"kwago.dev/monkey/token"
 	"testing"
+
+	"kwago.dev/monkey/token"
 )
 
 func TestNextToken(t *testing.T) {
-	input := `=+(){},;`
+	input := `
+        let five = 5;
+        let ten = 10;
+
+        let add = fn(x, y) {
+            x + y;
+        };
+
+        let result = add(five, ten);
+    `
 
 	tests := []struct {
-		exepectedType    token.TokenType
-		exepectedLiteral string
+		expectedType    token.TokenType
+		expectedLiteral string
 	}{
+		{token.LET, "let"},
+		{token.IDENT, "five"},
 		{token.ASSIGN, "="},
-		{token.PLUS, "+"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+
+		{token.LET, "let"},
+		{token.IDENT, "ten"},
+		{token.ASSIGN, "="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+
+		{token.LET, "let"},
+		{token.IDENT, "add"},
+		{token.ASSIGN, "="},
+		{token.FUNCTION, "fn"},
 		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
-		{token.RBRACE, "}"},
-		{token.COMMA, ","},
+		{token.IDENT, "x"},
+		{token.PLUS, "+"},
+		{token.IDENT, "y"},
 		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
+
+		{token.LET, "let"},
+		{token.IDENT, "result"},
+		{token.ASSIGN, "="},
+		{token.IDENT, "add"},
+		{token.LPAREN, "("},
+		{token.IDENT, "five"},
+		{token.COMMA, ","},
+		{token.IDENT, "ten"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+
+		{token.EOF, "EOF"},
 	}
 
 	lexer := New(input)
@@ -27,12 +70,13 @@ func TestNextToken(t *testing.T) {
 	for idx, tt := range tests {
 		token := lexer.NextToken()
 
-		if token.Type != tt.exepectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, actual=%q", idx, tt.exepectedType, token.Type)
+		if token.Literal != tt.expectedLiteral {
+			t.Fatalf("test[%d] - literal mismatch. expected=%q, actual=%q", idx, tt.expectedLiteral, token.Literal)
 		}
 
-		if token.Literal != tt.exepectedLiteral {
-			t.Fatalf("test[%d] - literal wrong. expected=%q, actual=%q", idx, tt.exepectedLiteral, token.Literal)
+		if token.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - type mismatch. expected=%q, actual=%q", idx, tt.expectedType, token.Type)
 		}
+
 	}
 }

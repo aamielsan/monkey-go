@@ -1,7 +1,10 @@
 package lexer
 
-import "kwago.dev/monkey/token"
-import "errors"
+import (
+	"errors"
+
+	"kwago.dev/monkey/token"
+)
 
 // Lexer: lexer(source) => tokens
 // Lexer takes in a source code as input and outputs a stream of tokens
@@ -20,9 +23,7 @@ func New(source string) *Lexer {
 func (l *Lexer) NextToken() token.Token {
 	char, err := l.nextChar()
 	if err != nil {
-		return token.Token{
-			Type: token.EOF,
-		}
+		return token.Eof
 	}
 
 	switch char {
@@ -42,19 +43,80 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Comma
 	case ';':
 		return token.Semicolon
+	case ' ', '\t', '\n', '\r':
+		// skip whitespaces
+		return l.NextToken()
 	default:
-		return token.Token{
-			Type:    token.ILLEGAL,
-			Literal: string(char),
+		if isLetter(char) {
+			tokenLiteral := l.readIdentifier()
+			tokenType := token.LookupTypeFrom(tokenLiteral)
+			return token.New(tokenType, tokenLiteral)
+		} else if isDigit(char) {
+			tokenLiteral := l.readNumber()
+			return token.Int(tokenLiteral)
+		} else {
+			return token.Illegal(string(char))
 		}
 	}
 }
 
-func (l *Lexer) nextChar() (byte, error) { // returning byte here means that we'll only support ASCII for now
+// returning byte here means that we'll only support ASCII for now
+func (l *Lexer) nextChar() (byte, error) {
+	l.position += 1
 	if l.position > len(l.input)-1 {
-		return 0, errors.New("EOF") // TODO: How will this differentiate with an actual `0` literal
+		return 0, errors.New("EOF")
 	} else {
-		l.position += 1
 		return l.input[l.position], nil
 	}
+}
+
+func (l *Lexer) peekChar() (byte, error) {
+	peekIdx := l.position + 1
+	if peekIdx > len(l.input)-1 {
+		return 0, errors.New("EOF")
+	} else {
+		return l.input[peekIdx], nil
+	}
+}
+
+func (l *Lexer) readIdentifier() string {
+	start := l.position
+
+	for {
+		peek, err := l.peekChar()
+		if err != nil || !isLetter(peek) {
+			break
+		} else {
+			l.nextChar()
+		}
+	}
+
+	end := l.position + 1
+	return l.input[start:end]
+}
+
+func (l *Lexer) readNumber() string {
+	start := l.position
+
+	for {
+		peek, err := l.peekChar()
+		if err != nil || !isDigit(peek) {
+			break
+		} else {
+			l.nextChar()
+		}
+	}
+
+	end := l.position + 1
+	return l.input[start:end]
+}
+
+// use to test an potential identifier
+// this means that our identifier can only start with letters or underscore
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func isDigit(char byte) bool {
+	return char >= '0' && char <= '9'
 }
