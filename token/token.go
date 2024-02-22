@@ -4,6 +4,11 @@ package token
 
 type TokenType string
 
+type Token struct {
+	Type    TokenType
+	Literal string
+}
+
 const (
 	ILLEGAL TokenType = "ILLEGAL"
 	EOF     TokenType = "EOF"
@@ -13,26 +18,26 @@ const (
 	INT   TokenType = "INT"   // ints
 
 	// Operators
-	ASSIGN TokenType = "="
-	PLUS   TokenType = "+"
+	ASSIGN TokenType = "ASSIGN"
+	PLUS   TokenType = "PLUS"
 
 	// Delimiters
-	COMMA     TokenType = ","
-	SEMICOLON TokenType = ";"
+	COMMA     TokenType = "COMMA"
+	SEMICOLON TokenType = "SEMICOLON"
 
-	LPAREN TokenType = "("
-	RPAREN TokenType = ")"
-	LBRACE TokenType = "{"
-	RBRACE TokenType = "}"
+	LPAREN TokenType = "LPAREN"
+	RPAREN TokenType = "RPAREN"
+	LBRACE TokenType = "LBRACE"
+	RBRACE TokenType = "RBRACE"
 
 	// Keywords
 	FUNCTION TokenType = "FUNCTION"
 	LET      TokenType = "LET"
 )
 
-type Token struct {
-	Type    TokenType
-	Literal string
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
 }
 
 func New(tokenType TokenType, literal string) Token {
@@ -42,13 +47,39 @@ func New(tokenType TokenType, literal string) Token {
 	}
 }
 
-// Constant types
-var EndOfFile = New(EOF, string(EOF))
-var Assign = New(ASSIGN, string(ASSIGN))
-var Plus = New(PLUS, string(PLUS))
-var Comma = New(COMMA, string(COMMA))
-var Semicolon = New(SEMICOLON, string(SEMICOLON))
-var LParen = New(LPAREN, string(LPAREN))
-var RParen = New(RPAREN, string(RPAREN))
-var LBrace = New(LBRACE, string(LBRACE))
-var RBrace = New(RBRACE, string(RBRACE))
+func LookupTypeFrom(str string) TokenType {
+	if tokenType, ok := keywords[str]; ok {
+		return tokenType
+	}
+	return IDENT
+}
+
+// Factory & constants
+var (
+	Eof       = New("EOF", "EOF")
+	Assign    = New("ASSIGN", "=")
+	Plus      = New("PLUS", "+")
+	Comma     = New("COMMA", ",")
+	Semicolon = New("SEMICOLON", ";")
+	LParen    = New("LPAREN", "(")
+	RParen    = New("RPAREN", ")")
+	LBrace    = New("LBRACE", "{")
+	RBrace    = New("RBRACE", "}")
+	Let       = New("LET", "let")
+)
+
+func Illegal(literal string) Token {
+	return New("ILLEGAL", literal)
+}
+
+func Ident(literal string) Token {
+	return New("IDENT", literal)
+}
+
+func Int(literal string) Token {
+	return New("INT", literal)
+}
+
+func Function(literal string) Token {
+	return New("FUNCTIOn", literal)
+}
