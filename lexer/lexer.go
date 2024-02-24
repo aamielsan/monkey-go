@@ -28,8 +28,8 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch char {
 	case '=':
-		tokenLiteral := l.readEquality()
-		if tokenLiteral == "==" {
+		if peek, err := l.peekChar(); err == nil && peek == '=' {
+			l.nextChar() // advance the cursor
 			return token.Equal
 		}
 		return token.Assign
@@ -58,8 +58,8 @@ func (l *Lexer) NextToken() token.Token {
 	case ';':
 		return token.Semicolon
 	case '!':
-		tokenLiteral := l.readEquality()
-		if tokenLiteral == "!=" {
+		if peek, err := l.peekChar(); err == nil && peek == '=' {
+			l.nextChar() // advance the cursor
 			return token.NotEqual
 		}
 		return token.Bang
@@ -120,22 +120,6 @@ func (l *Lexer) readNumber() string {
 	for {
 		peek, err := l.peekChar()
 		if err != nil || !isDigit(peek) {
-			break
-		} else {
-			l.nextChar()
-		}
-	}
-
-	end := l.position + 1
-	return l.input[start:end]
-}
-
-func (l *Lexer) readEquality() string {
-	start := l.position
-
-	for {
-		peek, err := l.peekChar()
-		if err != nil || peek != '=' { // TODO: Handle =========
 			break
 		} else {
 			l.nextChar()
