@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
-	"kwago.dev/monkey/lexer"
+	"kwago.dev/monkey/repl"
 )
 
 func main() {
-	token := lexer.New(`
-        let five = 5;
-    `).NextToken()
-	fmt.Printf("token is %+v", token)
+	repl.Start(os.Stdin, os.Stdout)
 }
