@@ -28,9 +28,19 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch char {
 	case '=':
+		tokenLiteral := l.readEquality()
+		if tokenLiteral == "==" {
+			return token.Equal
+		}
 		return token.Assign
 	case '+':
 		return token.Plus
+	case '-':
+		return token.Minus
+	case '*':
+		return token.Asterisk
+	case '/':
+		return token.Slash
 	case '(':
 		return token.LParen
 	case ')':
@@ -39,13 +49,22 @@ func (l *Lexer) NextToken() token.Token {
 		return token.LBrace
 	case '}':
 		return token.RBrace
+	case '<':
+		return token.LessThan
+	case '>':
+		return token.GreaterThan
 	case ',':
 		return token.Comma
 	case ';':
 		return token.Semicolon
+	case '!':
+		tokenLiteral := l.readEquality()
+		if tokenLiteral == "!=" {
+			return token.NotEqual
+		}
+		return token.Bang
 	case ' ', '\t', '\n', '\r':
-		// skip whitespaces
-		return l.NextToken()
+		return l.NextToken() // skip whitespaces
 	default:
 		if isLetter(char) {
 			tokenLiteral := l.readIdentifier()
@@ -101,6 +120,22 @@ func (l *Lexer) readNumber() string {
 	for {
 		peek, err := l.peekChar()
 		if err != nil || !isDigit(peek) {
+			break
+		} else {
+			l.nextChar()
+		}
+	}
+
+	end := l.position + 1
+	return l.input[start:end]
+}
+
+func (l *Lexer) readEquality() string {
+	start := l.position
+
+	for {
+		peek, err := l.peekChar()
+		if err != nil || peek != '=' { // TODO: Handle =========
 			break
 		} else {
 			l.nextChar()
