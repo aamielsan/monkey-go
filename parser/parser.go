@@ -17,14 +17,14 @@ func (p Parser) Errors() []string {
 }
 
 func NewParser(lexer *lexer.Lexer) *Parser {
-	parser := Parser{
+	parser := &Parser{
 		lexer: lexer,
 	}
 
 	parser.nextToken()
 	parser.nextToken()
 
-	return &parser
+	return parser
 }
 
 func (p *Parser) nextToken() {
@@ -33,5 +33,5 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
-	return nil
+	return &ast.Program{}
 }

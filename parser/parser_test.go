@@ -5,40 +5,73 @@ import (
 
 	"kwago.dev/monkey/ast"
 	"kwago.dev/monkey/lexer"
+	"kwago.dev/monkey/token"
 )
 
 func TestLetStatements(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      interface{}
-	}{
-		{"let x = 5;", "x", 5},
-		{"let y = true;", "y", true},
-		{"let foobar = y;", "foobar", "y"},
+	input := `
+let x = 5;
+
+let x = 10;
+
+let foobar = 838383;
+    `
+
+	l := lexer.New(input)
+	p := NewParser(l)
+
+	program := p.ParseProgram()
+
+	if program == nil {
+		t.Fatalf("Parse program returned nil")
 	}
 
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := NewParser(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statement. actual=%d", len(program.Statements))
+	}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
-				len(program.Statements))
-		}
+	tests := []struct {
+		expectedIdentifier string
+	}{
+		{"x"},
+		{"y"},
+		{"foobar"},
+	}
 
-		stmt := program.Statements[0]
-		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+	for idx, tt := range tests {
+		stmt := program.Statements[idx]
+		if !testLetStatements(t, stmt, tt.expectedIdentifier) {
 			return
 		}
-
-		//val := stmt.(*ast.LetStatement).Value
-		//if !testLiteralExpression(t, val, tt.expectedValue) {
-		//	return
-		//}
 	}
+}
+
+func testLetStatements(t *testing.T, s ast.Statement, name string) bool {
+	if s.TokenLiteral() != string(token.LET) {
+		t.Errorf("s.TokenLiteral is not 'let' but '%q'", s.TokenLiteral())
+		return false
+	}
+
+	letStmt, ok := s.(*ast.LetStatement)
+
+	if !ok {
+		t.Errorf("s is not '*ast.LetStatement' but '%T'", s)
+		return false
+	}
+
+	if letStmt.Name.Value != name {
+		t.Errorf("letStmt.Name.Value is not '%s' but '%s'", name, letStmt.Name.Value)
+		return false
+
+	}
+
+	if letStmt.TokenLiteral() != name {
+		t.Errorf("letStmt.TokenLiternal is not '%s' but '%s'", name, letStmt.Name.Value)
+		return false
+
+	}
+
+	return true
 }
 
 //	func TestReturnStatements(t *testing.T) {
